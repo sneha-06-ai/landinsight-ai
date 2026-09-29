@@ -1,0 +1,58 @@
+{
+  "notice": "Synthetic demonstration data only. Not an official Government of India dataset.",
+  "generated_at": "2026-09-29T08:42:00+05:30",
+  "overview": {
+    "research_papers": 24681,
+    "datasets": 1284,
+    "active_researchers": 8492,
+    "policy_documents": 3617,
+    "land_dispute_cases": 18306,
+    "climate_reports": 426
+  },
+  "resources": [
+    {
+      "id": "demo-resource-001",
+      "title": "Land tenure security and agricultural productivity in semi-arid India",
+      "type": "research_paper",
+      "institution": "Indian Institute of Science",
+      "year": 2025,
+      "tags": ["land tenure", "agriculture"],
+      "visibility": "public",
+      "license": "CC BY 4.0"
+    },
+    {
+      "id": "demo-resource-002",
+      "title": "District-level climate vulnerability assessment: a national framework",
+      "type": "government_report",
+      "institution": "Illustrative sample publisher",
+      "year": 2025,
+      "tags": ["climate", "assessment"],
+      "visibility": "public",
+      "license": "Demo metadata; confirm source license before reuse"
+    },
+    {
+      "id": "demo-resource-003",
+      "title": "Urban expansion and peri-urban land conversion in the Indo-Gangetic Plain",
+      "type": "research_paper",
+      "institution": "Illustrative sample publisher",
+      "year": 2024,
+      "tags": ["urban", "land use"],
+      "visibility": "public",
+      "license": "Demo metadata; confirm source license before reuse"
+    }
+  ],
+  "district_indicators": [
+    { "state": "Maharashtra", "district": "Pune", "year": 2025, "land_use_risk_index": 62, "climate_exposure_index": 58, "confidence": 0.82 },
+    { "state": "Odisha", "district": "Khordha", "year": 2025, "land_use_risk_index": 78, "climate_exposure_index": 82, "confidence": 0.76 },
+    { "state": "Assam", "district": "Kamrup Metropolitan", "year": 2025, "land_use_risk_index": 87, "climate_exposure_index": 73, "confidence": 0.71 }
+  ],
+  "simulation_example": {
+    "project_type": "highway",
+    "state": "Maharashtra",
+    "district": "Pune",
+    "budget_crore_inr": 450,
+    "area_hectares": 620,
+    "population_affected": 185000,
+    "outputs_are_illustrative": true
+  }
+}

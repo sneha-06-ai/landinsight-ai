@@ -1,0 +1,287 @@
+openapi: 3.1.0
+info:
+  title: LandInsight AI API
+  version: 1.0.0
+  description: Versioned API contract for the LandInsight AI evidence and land-governance platform.
+servers:
+  - url: https://api.example.gov.in/api/v1
+security:
+  - bearerAuth: []
+paths:
+  /me:
+    get:
+      summary: Get the authenticated profile and effective permissions
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Profile' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /search:
+    get:
+      summary: Search authorized resources and datasets
+      parameters:
+        - { in: query, name: q, required: true, schema: { type: string, minLength: 2, maxLength: 500 } }
+        - { in: query, name: type, schema: { type: string } }
+        - { in: query, name: state, schema: { type: string } }
+        - { in: query, name: year_from, schema: { type: integer } }
+        - { in: query, name: year_to, schema: { type: integer } }
+        - { in: query, name: cursor, schema: { type: string } }
+        - { in: query, name: limit, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+      responses:
+        '200':
+          description: Permission-filtered search results
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SearchResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /assistant/answers:
+    post:
+      summary: Generate an evidence-grounded answer with citations
+      x-required-roles: [super_admin, government_official, researcher, academic_institution]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question]
+              properties:
+                question: { type: string, minLength: 3, maxLength: 4000 }
+                resource_ids: { type: array, items: { type: string, format: uuid }, maxItems: 30 }
+                workspace_id: { type: string, format: uuid }
+                response_mode: { type: string, enum: [brief, compare, literature_review], default: brief }
+      responses:
+        '200':
+          description: Answer, citations, related resources, and caveats
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssistantAnswer' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /resources:
+    get:
+      summary: List resources visible to the caller
+      parameters:
+        - { in: query, name: type, schema: { type: string } }
+        - { in: query, name: q, schema: { type: string } }
+        - { in: query, name: cursor, schema: { type: string } }
+      responses:
+        '200':
+          description: Resource page
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResourcePage' }
+    post:
+      summary: Create resource metadata and an upload session
+      x-required-roles: [super_admin, government_official, researcher, academic_institution]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ResourceCreate' }
+      responses:
+        '201':
+          description: Resource and time-limited upload URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resource: { $ref: '#/components/schemas/Resource' }
+                  upload_url: { type: string, format: uri }
+                  expires_at: { type: string, format: date-time }
+  /resources/{resource_id}:
+    get:
+      summary: Get resource metadata and permitted versions
+      parameters:
+        - { in: path, name: resource_id, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: Resource detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Resource' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      summary: Update resource metadata
+      x-required-roles: [super_admin, government_official, researcher, academic_institution]
+      parameters:
+        - { in: path, name: resource_id, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Updated resource }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /resources/{resource_id}/versions:
+    get:
+      summary: List immutable resource versions
+      parameters:
+        - { in: path, name: resource_id, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Version history }
+  /resources/{resource_id}/download:
+    post:
+      summary: Create a short-lived authorized download URL
+      parameters:
+        - { in: path, name: resource_id, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Download URL and expiry }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /layers:
+    get:
+      summary: List map layers visible to the caller
+      responses:
+        '200':
+          description: Layer metadata and available dates
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Layer' }
+  /analytics/overview:
+    get:
+      summary: Return permission-filtered national or authorized-area indicators
+      parameters:
+        - { in: query, name: state_code, schema: { type: string } }
+        - { in: query, name: year, schema: { type: integer } }
+      responses:
+        '200': { description: Aggregated indicators and data provenance }
+  /simulations:
+    post:
+      summary: Queue a versioned land-policy impact simulation
+      x-required-roles: [super_admin, government_official]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SimulationRequest' }
+      responses:
+        '202':
+          description: Simulation queued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SimulationJob' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /simulations/{simulation_id}:
+    get:
+      summary: Get simulation status, output, assumptions, and provenance
+      parameters:
+        - { in: path, name: simulation_id, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: Simulation job
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SimulationJob' }
+  /workspaces:
+    get:
+      summary: List workspaces available to the caller
+      responses:
+        '200': { description: Workspace memberships }
+    post:
+      summary: Create a workspace
+      x-required-roles: [super_admin, government_official, researcher, academic_institution]
+      responses:
+        '201': { description: Created workspace }
+  /workspaces/{workspace_id}/members:
+    post:
+      summary: Invite or add a workspace member
+      x-required-roles: [workspace_owner]
+      parameters:
+        - { in: path, name: workspace_id, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '201': { description: Membership created }
+        '403': { $ref: '#/components/responses/Forbidden' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    Unauthorized:
+      description: Missing or invalid access token
+    Forbidden:
+      description: Caller lacks permission for this resource or operation
+    NotFound:
+      description: Resource not found or not visible to caller
+  schemas:
+    Profile:
+      type: object
+      required: [id, display_name, role, permissions]
+      properties:
+        id: { type: string, format: uuid }
+        display_name: { type: string }
+        role: { type: string, enum: [super_admin, government_official, researcher, academic_institution, public_user] }
+        organization_id: { type: [string, 'null'], format: uuid }
+        permissions: { type: array, items: { type: string } }
+    Resource:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        abstract: { type: [string, 'null'] }
+        resource_type: { type: string }
+        visibility: { type: string, enum: [public, workspace, restricted] }
+        publication_date: { type: [string, 'null'], format: date }
+        tags: { type: array, items: { type: string } }
+        metadata: { type: object, additionalProperties: true }
+        versions: { type: array, items: { type: object } }
+    ResourceCreate:
+      type: object
+      required: [title, resource_type, visibility]
+      properties:
+        title: { type: string, maxLength: 500 }
+        abstract: { type: [string, 'null'] }
+        resource_type: { type: string, enum: [research_paper, government_report, policy_document, legal_document, case_study, survey_report, dataset] }
+        visibility: { type: string, enum: [public, workspace, restricted] }
+        tags: { type: array, items: { type: string } }
+        metadata: { type: object, additionalProperties: true }
+    ResourcePage:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/Resource' } }
+        next_cursor: { type: [string, 'null'] }
+        total_estimate: { type: integer }
+    SearchResponse:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/Resource' } }
+        next_cursor: { type: [string, 'null'] }
+        facets: { type: object, additionalProperties: true }
+    AssistantAnswer:
+      type: object
+      required: [answer, citations, caveats, model_version]
+      properties:
+        answer: { type: string }
+        citations: { type: array, items: { type: object, required: [resource_id, version_id, excerpt], properties: { resource_id: { type: string, format: uuid }, version_id: { type: string, format: uuid }, excerpt: { type: string }, page: { type: [integer, 'null'] } } } }
+        related_resources: { type: array, items: { $ref: '#/components/schemas/Resource' } }
+        caveats: { type: array, items: { type: string } }
+        model_version: { type: string }
+    Layer:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        layer_key: { type: string }
+        title: { type: string }
+        source_date: { type: [string, 'null'], format: date }
+        license_id: { type: [string, 'null'] }
+        available_dates: { type: array, items: { type: string, format: date } }
+    SimulationRequest:
+      type: object
+      required: [title, project_type, area_code, inputs]
+      properties:
+        title: { type: string, maxLength: 240 }
+        project_type: { type: string, enum: [highway, smart_city, industrial_zone, acquisition, environmental, agriculture] }
+        area_code: { type: string }
+        inputs: { type: object, additionalProperties: true }
+        workspace_id: { type: [string, 'null'], format: uuid }
+    SimulationJob:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        status: { type: string, enum: [queued, running, succeeded, failed, cancelled] }
+        outputs: { type: [object, 'null'], additionalProperties: true }
+        confidence: { type: [object, 'null'], additionalProperties: true }
+        model_version: { type: string }
+        data_snapshot: { type: object, additionalProperties: true }
+        limitations: { type: [string, 'null'] }
