@@ -1,0 +1,70 @@
+"use client";
+
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { ArrowLeft, ArrowRight, Eye, EyeOff, LockKeyhole, ShieldCheck } from "lucide-react";
+
+const LandMap = dynamic(() => import("./land-map"), {
+  ssr: false,
+  loading: () => <div className="login-map-loading">Loading land intelligence</div>,
+});
+
+export default function LoginPortal() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setMessage("Sign-in is not connected yet. Your credentials were not sent or stored.");
+  };
+
+  return <main className="login-page">
+    <section className="login-visual" aria-label="LandInsight platform">
+      <div className="login-map"><LandMap activeLayer="Climate vulnerability" satelliteView={false} compact /></div>
+      <div className="login-visual-wash" />
+      <Link className="login-brand" href="/" aria-label="LandInsight home">
+        <span className="login-brand-mark"><span /></span>
+        <span><strong>land<span>insight</span></strong><small>National evidence platform</small></span>
+      </Link>
+      <div className="login-visual-copy">
+        <span className="login-kicker"><i /> NATIONAL LAND INTELLIGENCE</span>
+        <h1>Evidence that helps us<br /><em>see the whole picture.</em></h1>
+        <p>Research, policy and geospatial insight for better land decisions across India.</p>
+        <div className="login-visual-meta"><span><ShieldCheck size={14} /> Secure workspace</span><span>28 states · One evidence network</span></div>
+      </div>
+      <div className="login-map-caption">LAND & CLIMATE INDICATORS <span>ILLUSTRATIVE VIEW</span></div>
+    </section>
+
+    <section className="login-form-side">
+      <Link className="login-back" href="/"><ArrowLeft size={15} /> Back to platform</Link>
+      <div className="login-form-wrap">
+        <div className="login-form-heading">
+          <span className="login-lock"><LockKeyhole size={18} /></span>
+          <span className="login-kicker">ACCOUNT ACCESS</span>
+          <h2>Welcome back</h2>
+          <p>Sign in with your organization account to continue.</p>
+        </div>
+
+        <form className="login-form" onSubmit={handleSubmit}>
+          <label htmlFor="login-email">Work email</label>
+          <input id="login-email" name="email" type="email" autoComplete="username" placeholder="name@organization.gov.in" required value={email} onChange={(event) => setEmail(event.target.value)} />
+          <div className="login-password-label"><label htmlFor="login-password">Password</label><span>Organization account</span></div>
+          <div className="login-password-field">
+            <input id="login-password" name="password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="Enter your password" required value={password} onChange={(event) => setPassword(event.target.value)} />
+            <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+          </div>
+          <button className="login-submit" type="submit">Sign in <ArrowRight size={15} /></button>
+          {message && <p className="login-feedback" role="status">{message}</p>}
+        </form>
+
+        <div className="login-provider-note"><ShieldCheck size={15} /><p><strong>Authentication setup required</strong><span>Connect your organization&apos;s identity provider to enable secure sign-in.</span></p></div>
+        <p className="login-help">Need an account? Contact your workspace administrator.</p>
+      </div>
+      <footer className="login-footer"><span><LockKeyhole size={12} /> Protected workspace</span><span>LandInsight AI · 2026</span></footer>
+    </section>
+  </main>;
+}
