@@ -27,17 +27,17 @@ export default function LoginPortal() {
     <section className="login-visual" aria-label="LandInsight platform">
       <div className="login-map"><LandMap activeLayer="Climate vulnerability" satelliteView={false} compact /></div>
       <div className="login-visual-wash" />
-      <Link className="login-brand" href="/" aria-label="LandInsight home">
+      <Link className="login-brand" href="/" aria-label="Bhoomi-Niti Home">
         <span className="login-brand-mark"><span /></span>
-        <span><strong>land<span>insight</span></strong><small>National evidence platform</small></span>
+        <span><strong>bhoomi<span style={{ color: "#d97706" }}>.niti</span></strong><small>National Land Governance Layer · SIH 2026</small></span>
       </Link>
       <div className="login-visual-copy">
-        <span className="login-kicker"><i /> NATIONAL LAND INTELLIGENCE</span>
-        <h1>Evidence that helps us<br /><em>see the whole picture.</em></h1>
-        <p>Research, policy and geospatial insight for better land decisions across India.</p>
-        <div className="login-visual-meta"><span><ShieldCheck size={14} /> Secure workspace</span><span>28 states · One evidence network</span></div>
+        <span className="login-kicker"><i /> BHOOMI-NITI · PROBLEM ID: 26019</span>
+        <h1>Evidence that helps us<br /><em>see the whole cadastre.</em></h1>
+        <p>Connecting research, policy experimentation, legal knowledge, and geospatial evidence across India.</p>
+        <div className="login-visual-meta"><span><ShieldCheck size={14} /> PostGIS Encrypted</span><span>28 States · One Unified Cadastral Network</span></div>
       </div>
-      <div className="login-map-caption">LAND & CLIMATE INDICATORS <span>ILLUSTRATIVE VIEW</span></div>
+      <div className="login-map-caption">CADASTRAL & CLIMATE LAYERS <span>PERSON-PARCEL-PIXEL</span></div>
     </section>
 
     <section className="login-form-side">
@@ -64,7 +64,7 @@ export default function LoginPortal() {
         <div className="login-provider-note"><ShieldCheck size={15} /><p><strong>Demo access only</strong><span>Authentication is not configured. Credentials are not checked, sent or stored.</span></p></div>
         <p className="login-help">Need an account? Contact your workspace administrator.</p>
       </div>
-      <footer className="login-footer"><span><LockKeyhole size={12} /> Protected workspace</span><span>LandInsight AI · 2026</span></footer>
+      <footer className="login-footer"><span><LockKeyhole size={12} /> Protected Government Gateway</span><span>Bhoomi-Niti · Team Neural Minds · SIH 2026</span></footer>
     </section>
   </main>;
 }
